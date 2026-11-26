@@ -1,6 +1,6 @@
 # Okun's Law Across U.S. States
 
-Does faster GDP growth lower unemployment by the same amount in every state? This project tests Okun's Law for Florida, Alabama, Washington, New York and South Dakota using quarterly data from 2005 to 2022.
+Does faster GDP growth lower unemployment by the same amount in every state? This project tests Okun's Law for Florida, Alabama, Washington, New York and South Dakota using quarterly data from 2005 to 2024.
 
 It's a rebuild of my 2024 undergraduate econometrics paper. The original regressed the unemployment *level* on GDP growth and found almost nothing. This version uses the specification Okun's Law actually describes and shows why the first one failed.
 
@@ -8,10 +8,11 @@ It's a rebuild of my 2024 undergraduate econometrics paper. The original regress
 
 ## Key findings
 
-- **The 2024 null result came from the model, not the economy.** Regressing the unemployment level on GDP growth gives R² ≤ 0.05 and Durbin-Watson statistics of 0.17–0.53, a sign of misspecification. Modeling the *change* in unemployment fixes both problems.
-- **Outside the pandemic, Okun's Law holds clearly in Florida and Alabama.** Excluding 2020–21, one extra point of year-over-year GDP growth goes with unemployment about 0.42 points lower in Florida (R² ≈ 0.68) and 0.65 points lower in Alabama. Both stay significant in the quarterly model. Washington is borderline.
+- **The 2024 null result came from the model, not the economy.** Regressing the unemployment level on GDP growth gives R² ≤ 0.07 and Durbin-Watson statistics below 0.6, a sign of misspecification. Modeling the *change* in unemployment raises R² as high as 0.66.
+- **Outside the pandemic, Okun's Law is clearest in Florida.** Excluding 2020–21, one extra point of year-over-year GDP growth goes with unemployment about 0.37 points lower (R² ≈ 0.61), and it holds quarter on quarter too.
+- **Alabama and Washington show it less robustly.** Year over year: about −0.47 in Alabama and −0.29 in Washington. Quarter on quarter, Alabama is borderline and Washington isn't significant.
 - **New York and South Dakota show no stable relationship outside 2020–21.** Their full-sample coefficients are driven by the pandemic shock.
-- **States don't share one coefficient.** A Wald test rejects equal slopes across the five states (χ²(4) = 75.6, p < 0.001).
+- **States don't share one coefficient.** A Wald test rejects equal slopes across the five states (χ²(4) = 41.1, p < 0.001).
 
 ## Methods
 
@@ -31,9 +32,10 @@ It's a rebuild of my 2024 undergraduate econometrics paper. The original regress
 ## Project structure
 
 ```
-data/original_2024_data.csv   quarterly unemployment rate and real GDP, 5 states, 2005–2022
+data/fred_data.csv            quarterly unemployment rate and real GDP, 5 states, 2005–2024 (main data)
+data/original_2024_data.csv   the data behind the 2024 paper, used only to replicate it
 src/okun.py                   helper functions: variables, regressions, tests
-src/fetch_fred.py             optional: download fresh data from FRED
+src/fetch_fred.py             downloads data/fred_data.csv from FRED
 okun_analysis.ipynb           the analysis, start to finish
 figures/                      charts used in the report
 report/okun_report.html       the report without code
@@ -48,11 +50,11 @@ pip install -r requirements.txt
 jupyter notebook okun_analysis.ipynb
 ```
 
-To refresh the data, run `python src/fetch_fred.py`, then point `DATA_PATH` in the notebook to `data/fred_data.csv`.
+To refresh the data, run `python src/fetch_fred.py`, then rerun the notebook. (On a Mac with Python from python.org, run its "Install Certificates" command once if the download fails with a certificate error.)
 
 ## Data
 
-The data come from FRED (Federal Reserve Bank of St. Louis): state unemployment rates (BLS) and state real GDP (BEA), quarterly. The included file is my 2024 download. In that file, Alabama's unemployment series is not seasonally adjusted while the others are; `fetch_fred.py` downloads seasonally adjusted series for all five states.
+From FRED (Federal Reserve Bank of St. Louis): seasonally adjusted state unemployment rates (BLS, series `{ST}UR`, monthly averaged to quarters) and state real GDP (BEA, series `{ST}RQGSP`, millions of chained 2017 dollars). The 2024 paper's file is kept only for the replication; it mixed in a non-seasonally-adjusted Alabama series, and both agencies revise past data, so its numbers differ slightly.
 
 ## Limitations
 
@@ -63,4 +65,4 @@ The data come from FRED (Federal Reserve Bank of St. Louis): state unemployment 
 
 ## Author
 
-Sebastián Pedraza, MS Applied Data Science, New College of Florida. Original paper: *State-Level Estimation of Okun's Law* (Econometrics, December 2024). 
+Sebastián Pedraza, MS Applied Data Science, New College of Florida. Original paper: *State-Level Estimation of Okun's Law* (Econometrics, December 2024). I used Claude (Anthropic) as a coding assistant for this rebuild.

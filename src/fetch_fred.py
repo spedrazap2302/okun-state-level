@@ -12,6 +12,8 @@ Monthly unemployment is averaged to quarters to match GDP.
 """
 
 import io
+import time
+import urllib.error
 import urllib.request
 
 import pandas as pd
@@ -21,11 +23,21 @@ START, END = "2005-01-01", "2024-12-31"
 URL = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={series}&cosd={start}&coed={end}"
 
 
-def get_series(series):
+def get_series(series, attempts=3):
     """Download one FRED series as a DataFrame with columns date, value."""
     url = URL.format(series=series, start=START, end=END)
-    with urllib.request.urlopen(url, timeout=30) as response:
-        text = response.read().decode("utf-8")
+    # A browser-like header: FRED sometimes refuses requests that don't send one.
+    request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (okun-state-level)"})
+    for attempt in range(1, attempts + 1):
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                text = response.read().decode("utf-8")
+            break
+        except urllib.error.HTTPError as err:
+            print(f"  {series}: attempt {attempt} failed ({err.code} {err.reason})")
+            if attempt == attempts:
+                raise RuntimeError(f"Could not download {series} from {url}") from err
+            time.sleep(3 * attempt)  # wait a little longer each time, then retry
     df = pd.read_csv(io.StringIO(text))
     df.columns = ["date", "value"]  # FRED names them observation_date, <series>
     df["date"] = pd.to_datetime(df["date"])
@@ -48,6 +60,7 @@ def main():
         both.insert(0, "state", st)
         frames.append(both)
         print(f"{st}: {len(both)} quarters")
+        time.sleep(1)  # be polite to FRED between states
 
     out = pd.concat(frames)
     out.to_csv("data/fred_data.csv", index=False)
