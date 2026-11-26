@@ -65,4 +65,4 @@ From FRED (Federal Reserve Bank of St. Louis): seasonally adjusted state unemplo
 
 ## Author
 
-Sebastián Pedraza, MS Applied Data Science, New College of Florida. Original paper: *State-Level Estimation of Okun's Law* (Econometrics, December 2024). I used Claude (Anthropic) as a coding assistant for this rebuild.
+Sebastián Pedraza, MS Applied Data Science, New College of Florida. Original paper: *State-Level Estimation of Okun's Law* (Econometrics, December 2024). 
